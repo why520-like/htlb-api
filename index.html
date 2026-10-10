@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>高性价比人生指南 · 检索</title>
+<style>
+:root{
+  --bg:#faf8f5; --fg:#211d19; --muted:#7a7168; --card:#fff; --border:#e8e2d9;
+  --accent:#a4432b; --mark:#ffe8a3; --pill:#f3ede4; --pill-fg:#5c5247;
+  --ev-a:#2e7d4f; --ev-b:#8a6d1f; --ev-c:#8a4b4b;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#16140f; --fg:#e9e4dc; --muted:#9c938a; --card:#1f1c16; --border:#332e26;
+    --accent:#e08a6d; --mark:#5c4a12; --pill:#2a251d; --pill-fg:#c9c0b4;
+    --ev-a:#7bc99a; --ev-b:#d4b96a; --ev-c:#d48a8a; }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font:16px/1.65 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;}
+header{padding:36px 20px 10px;max-width:860px;margin:0 auto}
+h1{font-size:26px;margin:0 0 6px;letter-spacing:.5px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+#q{width:100%;padding:13px 16px;font-size:16px;border:1.5px solid var(--border);
+  border-radius:12px;background:var(--card);color:var(--fg);outline:none}
+#q:focus{border-color:var(--accent)}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 0;font-size:13px;color:var(--muted)}
+select{font:inherit;font-size:13px;padding:5px 8px;border-radius:8px;border:1px solid var(--border);
+  background:var(--card);color:var(--fg)}
+.evbtn{cursor:pointer;user-select:none;padding:4px 10px;border-radius:999px;border:1px solid var(--border);
+  background:var(--card);color:var(--muted)}
+.evbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+#hint{max-width:860px;margin:0 auto;padding:0 20px;color:var(--muted);font-size:13px}
+main{max-width:860px;margin:0 auto;padding:14px 20px 60px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:16px 18px;margin:12px 0}
+.card .meta{font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.card h3{margin:6px 0 6px;font-size:17px;line-height:1.5}
+.card .plain{margin:0 0 10px;font-size:14.5px;color:var(--fg);white-space:pre-wrap}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+.pill{font-size:12px;padding:3px 9px;border-radius:999px;background:var(--pill);color:var(--pill-fg)}
+.pill.ratio-极高{background:#fbe3d9;color:#8f2f12}
+.pill.ratio-高{background:#f7ead9;color:#7a5a1e}
+.pill.ev{border:1px solid var(--border)}
+.pill.ev-A{color:var(--ev-a);background:transparent;border:1px solid var(--ev-a)}
+.pill.ev-B{color:var(--ev-b);background:transparent;border:1px solid var(--ev-b)}
+.pill.ev-C{color:var(--ev-c);background:transparent;border:1px solid var(--ev-c)}
+.pill.warn{background:#fbeaea;color:#9c3a3a}
+@media (prefers-color-scheme: dark){
+  .pill.ratio-极高{background:#4a2113;color:#f0b9a4}
+  .pill.ratio-高{background:#3d3017;color:#e2c889}
+  .pill.warn{background:#402020;color:#e0a0a0}
+}
+details{margin-top:8px}
+summary{cursor:pointer;font-size:13px;color:var(--accent)}
+details .body{margin-top:8px;font-size:14px;white-space:pre-wrap}
+details .body b{display:block;margin:10px 0 2px;font-size:13px;color:var(--muted)}
+details a{color:var(--accent);word-break:break-all}
+mark{background:var(--mark);color:inherit;border-radius:3px;padding:0 2px}
+#more{color:var(--muted);font-size:14px;text-align:center;padding:10px}
+footer{max-width:860px;margin:0 auto;padding:0 20px 50px;color:var(--muted);font-size:12.5px;line-height:1.8}
+footer code{background:var(--pill);padding:1px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<header>
+  <h1>高性价比人生指南</h1>
+  <p class="sub">把「怎么活得更好」按 寿命 / 时间精力 / 金钱 / 人身自由 四笔账分开算，按性价比排序 · 共 <span id="count">…</span> 条，每条带成本、收益、证据等级和原始出处</p>
+  <input id="q" placeholder="搜一句话试试：熬夜、低钠盐、被裁、兼职、疫苗…" autocomplete="off">
+  <div class="filters">
+    <span>节</span><select id="sec"><option value="">全部</option></select>
+    <span>证据</span>
+    <span class="evbtn" data-ev="A">A 级</span>
+    <span class="evbtn" data-ev="B">B 级</span>
+    <span class="evbtn" data-ev="C">C 级</span>
+    <span>性价比</span><select id="ratio"><option value="">全部</option><option>极高</option><option>高</option><option>一般</option></select>
+  </div>
+</header>
+<p id="hint"></p>
+<main id="list"></main>
+<footer>
+  数据：<a href="https://github.com/sin0317/htlb-dataset" style="color:var(--accent)">htlb-dataset</a>（每日自动同步上游）· 原文 <a href="https://github.com/eternity4719/HowToLiveBetter" style="color:var(--accent)">《高性价比人生指南》</a>（CC BY 4.0）· 同步于 <span id="sync">…</span><br>
+  数据接口：<code>data/htlb.json</code>（全量 JSON，可直接 fetch / 下载）· 页面不替代医生、律师、会计；金额与政策类条目用时自查官方渠道
+</footer>
+<script>
+const $=s=>document.querySelector(s);
+let items=[],meta={},txt=[],txtDF=null,evState="";
+const RATIO_R={"极高":0,"高":1,"一般":2},EV_R={A:0,B:1,C:2};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const tok=q=>(q||"").toLowerCase().split(/[\s,，、;；]+/).filter(Boolean);
+
+fetch("data/htlb.json",{cache:"no-cache"}).then(r=>r.json()).then(db=>{
+  items=db.items||[];meta=db.meta||{};
+  txt=items.map(it=>[it.title,it.plain,it.cost_text,it.benefit_text,it.note,it.section_title].filter(Boolean).join("\n").toLowerCase());
+  txtDF=new Map();
+  txt.forEach(x=>{const s=new Set();for(let k=0;k<x.length-1;k++)s.add(x.slice(k,k+2));s.forEach(bg=>txtDF.set(bg,(txtDF.get(bg)||0)+1));});
+  $("#count").textContent=items.length;
+  $("#sync").textContent=(meta.synced_at||"").replace("T"," ").replace("Z"," UTC");
+  const sec=$("#sec");
+  (db.sections||[]).forEach(s=>{const o=document.createElement("option");o.value=s.no;o.textContent=`${String(s.no).padStart(2,"0")} ${s.title}`;sec.appendChild(o);});
+  const uq=new URLSearchParams(location.search).get("q");if(uq){$("#q").value=uq;}
+  run();
+}).catch(e=>{$("#hint").textContent="数据加载失败："+e;});
+
+function hl(s,words){s=esc(s);for(const w of words){if(!w)continue;const e=esc(w).replace(/[.*+?^${}()|[\]\\]/g,"\\$&");s=s.replace(new RegExp(e,"gi"),m=>`<mark>${m}</mark>`);}return s;}
+
+function render(list,n,words){
+  const el=$("#list");
+  if(!list.length){el.innerHTML='<p id="more">没有匹配的条目，换个词试试</p>';return;}
+  el.innerHTML=list.map(it=>{
+    const p=[];
+    if(it.ratio)p.push(`<span class="pill ratio-${it.ratio}">${it.ratio}性价比</span>`);
+    if(it.evidence)p.push(`<span class="pill ev ev-${it.evidence}">${it.evidence} 级</span>`);
+    p.push(`<span class="pill">钱 ${it.cost_money==="0"?"不花":it.cost_money}</span>`);
+    p.push(`<span class="pill">时间 ${it.cost_time}</span>`);
+    if(it.cost_willpower&&it.cost_willpower!=="否")p.push(`<span class="pill">毅力 ${it.cost_willpower}</span>`);
+    if(it.disputed)p.push(`<span class="pill warn">争议</span>`);
+    if(it.todo)p.push(`<span class="pill warn">待核实</span>`);
+    const src=(it.sources||[]).map(u=>`<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u)}</a>`).join("<br>");
+    return `<article class="card">
+  <div class="meta"><span>第 ${it.section} 节 · ${esc(it.section_title)}</span><span>#${esc(it.id)}</span></div>
+  <h3>${hl(it.title,words)}</h3>
+  <p class="plain">${hl(it.plain,words)}</p>
+  <div class="tags">${p.join("")}</div>
+  <details><summary>展开：算账细节、证据与出处</summary><div class="body">
+    ${it.cost_text?`<b>成本</b>${esc(it.cost_text)}`:""}
+    ${it.benefit_text?`<b>收益（证据）</b>${esc(it.benefit_text)}`:""}
+    ${it.note?`<b>备注</b>${esc(it.note)}`:""}
+    ${src?`<b>来源</b>${src}`:""}
+  </div></details>
+</article>`;}).join("");
+  if(n>list.length)el.insertAdjacentHTML("beforeend",`<p id="more">还有 ${n-list.length} 条匹配，继续输入缩小范围</p>`);
+}
+
+function run(){
+  const words=tok($("#q").value),sec=$("#sec").value,ratio=$("#ratio").value;
+  let out=[];
+  items.forEach((it,i)=>{
+    if(sec&&String(it.section)!==sec)return;
+    if(evState&&it.evidence!==evState)return;
+    if(ratio&&it.ratio!==ratio)return;
+    let score=0;
+    if(words.length){
+      const t=txt[i],title=String(it.title||"").toLowerCase();
+      for(const w of words){
+        const c=t.split(w).length-1;
+        if(c){score+=c+(title.includes(w)?6:0);continue;}
+        // 长中文词整串未命中时，退化为低文档频率的 2 字片段（免分词器的兜底）
+        if(w.length>=3&&!/^[\x00-\x7f]+$/.test(w)){
+          for(let k=0;k<w.length-1;k++){
+            const bg=w.slice(k,k+2);
+            if((txtDF.get(bg)||0)>items.length*0.08)continue;
+            if(t.includes(bg))score+=0.4+((String(it.title||"").toLowerCase().includes(bg))?1.5:0);
+          }
+        }
+      }
+      if(score<=0)return;
+    }
+    out.push([score,it]);
+  });
+  out.sort((a,b)=>b[0]-a[0]||(RATIO_R[a[1].ratio]??9)-(RATIO_R[b[1].ratio]??9)||(EV_R[a[1].evidence]??9)-(EV_R[b[1].evidence]??9)||a[1].section-b[1].section||a[1].no-b[1].no);
+  $("#hint").textContent=words.length?`匹配 ${out.length} 条`:"";
+  render(out.slice(0,50).map(x=>x[1]),out.length,words);
+}
+
+let t=null;
+$("#q").addEventListener("input",()=>{clearTimeout(t);t=setTimeout(run,120);});
+$("#sec").addEventListener("change",run);
+$("#ratio").addEventListener("change",run);
+document.querySelectorAll(".evbtn").forEach(b=>b.addEventListener("click",()=>{
+  const v=b.dataset.ev;
+  if(evState===v){evState="";b.classList.remove("on");}
+  else{evState=v;document.querySelectorAll(".evbtn").forEach(x=>x.classList.remove("on"));b.classList.add("on");}
+  run();
+}));
+</script>
+</body>
+</html>
